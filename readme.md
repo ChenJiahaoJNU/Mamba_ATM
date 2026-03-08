@@ -29,5 +29,5 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 # test
 
 ```py
-python /home/cjh2004/Mamba3.3/modules/text_simple改.py
+python main.py
 ```

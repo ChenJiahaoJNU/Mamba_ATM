@@ -58,7 +58,7 @@ if __name__ == "__main__":
         'mambaamt_buy_threshold': 0.15,   # 更低的加仓阈值
         'mambaamt_sell_threshold': 0.05,  # 更低的卖出阈值
         'mambaamt_base_quantity': 200,    # 更大的基础仓位
-        'mambaamt_add_quantity': 50,      # 更小的加仓量
+        'mambaamt_add_quantity': 200,      # 更小的加仓量
     }
     
     ALPHA = 0.05

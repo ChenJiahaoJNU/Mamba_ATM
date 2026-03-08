@@ -111,7 +111,7 @@ class StandardTradingSimulator:
         self.cash -= total
         self.avg_price = ((self.avg_price * self.position) + (price * shares)) / (self.position + shares) if self.position > 0 else price
         self.position += shares
-        self.trade_count += 1
+        self.trade_count += 2
         self.total_trading_cost += cost
         return True
 
@@ -131,7 +131,7 @@ class StandardTradingSimulator:
         self.position -= shares
         if self.position == 0:
             self.avg_price = 0
-        self.trade_count += 1
+        self.trade_count += 2
         self.total_trading_cost += cost
         return profit
 
@@ -227,20 +227,7 @@ class StandardTradingSimulator:
     
     
     
-class EnhancedTradingSimulator(StandardTradingSimulator):
-    """MambaAMT增强版"""
 
-    def simulate(self):
-
-        if len(self.y_pred) > 5:
-            self.y_pred = savgol_filter(self.y_pred, 5, 2)
-
-        # 使用更保守信号
-        self.trading_config["buy_signal"] = self.trading_config.get("mambaamt_buy_signal", 0.4)
-        self.trading_config["sell_signal"] = self.trading_config.get("mambaamt_sell_signal", -0.4)
-        self.trading_config["confidence_threshold"] = 0.1
-
-        return super().simulate()
 
 
 # ===============================
@@ -249,7 +236,4 @@ class EnhancedTradingSimulator(StandardTradingSimulator):
 
 def get_trading_simulator(model_name, df_scaled, y_pred, stock_code, trading_config, logger):
 
-    if model_name == "Attention-MambaAMT-Enhanced":
-        return EnhancedTradingSimulator(df_scaled, y_pred, stock_code, trading_config, logger)
-    else:
-        return StandardTradingSimulator(df_scaled, y_pred, stock_code, trading_config, logger)
+    return StandardTradingSimulator(df_scaled, y_pred, stock_code, trading_config, logger)
