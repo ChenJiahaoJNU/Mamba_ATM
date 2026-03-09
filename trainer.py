@@ -11,110 +11,7 @@ from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 
 # 导入独立的交易模拟器模块
 from trading_simulator import get_trading_simulator
-
-# ===================== 增强版模型训练器（适配MambaAMT） =====================
-class EnhancedModelTrainer:
-    """增强版训练器，为MambaAMT定制优化策略"""
-    def __init__(self, model, train_x, train_y, criterion, model_name, device, hyper_params, logger):
-        self.model = model.to(device)
-        self.train_x = train_x.to(device)
-        self.train_y = train_y.to(device)
-        self.criterion = criterion
-        self.model_name = model_name
-        self.device = device
-        self.hyper_params = hyper_params
-        self.logger = logger
-        
-    def train(self):
-        # MambaAMT专属优化器配置
-        if "MambaAMT" in self.model_name:
-            optimizer = optim.AdamW(
-                self.model.parameters(), 
-                lr=self.hyper_params['mambaamt_lr'],
-                weight_decay=self.hyper_params['mambaamt_weight_decay'],
-                betas=(0.9, 0.999),
-                eps=1e-8
-            )
-            scheduler = CosineAnnealingLR(
-                optimizer, 
-                T_max=self.hyper_params['num_epochs'],
-                eta_min=self.hyper_params['mambaamt_lr'] * 0.01
-            )
-        else:
-            optimizer = optim.Adam(
-                self.model.parameters(), 
-                lr=self.hyper_params['learning_rate'],
-                weight_decay=self.hyper_params['weight_decay']
-            )
-            scheduler = StepLR(
-                optimizer, 
-                step_size=self.hyper_params['step_size'],
-                gamma=self.hyper_params['gamma']
-            )
-        
-        train_losses = []
-        best_loss = float('inf')
-        patience = 10
-        patience_counter = 0
-        
-        for epoch in range(self.hyper_params['num_epochs']):
-            self.model.train()
-            optimizer.zero_grad()
-            
-            if epoch == 0:
-                self.logger.write(f"{self.model_name} 输入形状: {self.train_x.shape}\n")
-            
-            outputs = self.model(self.train_x)
-            
-            if epoch == 0:
-                self.logger.write(f"{self.model_name} 输出形状: {outputs.shape}\n")
-                self.logger.write(f"{self.model_name} 标签形状: {self.train_y.shape}\n")
-                if torch.isnan(outputs).any():
-                    self.logger.write(f"警告：{self.model_name} 输出包含NaN值！\n")
-                    print(f"警告：{self.model_name} 输出包含NaN值！")
-                self.logger.write(f"{self.model_name} 输出范围: [{torch.min(outputs):.4f}, {torch.max(outputs):.4f}]\n")
-                self.logger.write(f"{self.model_name} 标签范围: [{torch.min(self.train_y):.4f}, {torch.max(self.train_y):.4f}]\n")
-            
-            if outputs.shape != self.train_y.shape:
-                outputs = outputs.view(self.train_y.shape)
-            
-            loss = self.criterion(outputs, self.train_y)
-            
-            # MambaAMT梯度裁剪更严格
-            if "MambaAMT" in self.model_name:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.5)
-            else:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            
-            train_losses.append(loss.item())
-            
-            # 早停机制（仅MambaAMT）
-            if "MambaAMT" in self.model_name:
-                if loss.item() < best_loss:
-                    best_loss = loss.item()
-                    patience_counter = 0
-                    # 保存最佳模型
-                    torch.save(self.model.state_dict(), f'best_mambaamt_model.pth')
-                else:
-                    patience_counter += 1
-                    if patience_counter >= patience:
-                        self.logger.write(f"早停触发，停止训练在epoch {epoch+1}\n")
-                        break
-            
-            if (epoch + 1) % 10 == 0:
-                self.logger.write(f"[{self.model_name}] Epoch {epoch + 1}/{self.hyper_params['num_epochs']}, Loss: {loss.item():.4f}\n")
-                self.logger.flush()
-        
-        # 加载MambaAMT最佳模型
-        if "MambaAMT" in self.model_name and os.path.exists('best_mambaamt_model.pth'):
-            self.model.load_state_dict(torch.load('best_mambaamt_model.pth'))
-            self.logger.write(f"加载MambaAMT最佳模型，最佳损失: {best_loss:.4f}\n")
-        
-        return self.model, train_losses
+from trading_simulator import EnhancedModelTrainer
 
 
 # ===================== 模型评估和实验执行模块 =====================
@@ -171,12 +68,13 @@ def evaluate_model(model, test_x, test_y, criterion, device):
         print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
         
         return binary_outputs, metrics
-
+from datetime import datetime  # 新增：导入时间模块
+TIMESTAMP = datetime.now().strftime('%Y%m%d_%H%M%S')  # 格式：年月日_时分秒
 
 def run_experiment(model_name, model_class, input_dim, train_x, train_y, test_x, test_y, criterion, 
                    is_combined=False, model_type=None, device=None, hyper_params=None, 
                    mamba_config=None, repeat_times=5, test_size=0.25, data_dir='./pre_data', 
-                   output_dir='./out', logger=None, trading_config=None):
+                   output_dir=f'./out{TIMESTAMP}', logger=None, trading_config=None):
     all_returns = []
     all_metrics = []
     all_preds = []

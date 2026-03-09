@@ -197,17 +197,17 @@ if __name__ == "__main__":
         attn_all_raw_returns[name] = raw_returns
     
     # 运行增强版MambaAMT
-    mambaamt_returns, mambaamt_metrics, mambaamt_all_returns = run_experiment(
-        "Attention-MambaAMT-Enhanced", AdvancedMambaAMT, INPUT_DIM, train_x_raw, train_y_raw, test_x_raw, test_y_raw, 
-        attn_criterion, device=DEVICE, hyper_params=HYPER_PARAMS, repeat_times=REPEAT_TIMES, test_size=TEST_SIZE,
-        data_dir=DATA_DIR, output_dir=OUTPUT_DIR, logger=stats_logger, trading_config=TRADING_CONFIG
-    )
-    attn_all_returns["Attention-MambaAMT-Enhanced"] = mambaamt_returns
-    attn_all_raw_returns["Attention-MambaAMT-Enhanced"] = mambaamt_all_returns
+    # mambaamt_returns, mambaamt_metrics, mambaamt_all_returns = run_experiment(
+    #     "Attention-MambaAMT-Enhanced", AdvancedMambaAMT, INPUT_DIM, train_x_raw, train_y_raw, test_x_raw, test_y_raw, 
+    #     attn_criterion, device=DEVICE, hyper_params=HYPER_PARAMS, repeat_times=REPEAT_TIMES, test_size=TEST_SIZE,
+    #     data_dir=DATA_DIR, output_dir=OUTPUT_DIR, logger=stats_logger, trading_config=TRADING_CONFIG
+    # )
+    # attn_all_returns["Attention-MambaAMT-Enhanced"] = mambaamt_returns
+    # attn_all_raw_returns["Attention-MambaAMT-Enhanced"] = mambaamt_all_returns
     
     # Attention统计检验（包含增强版MambaAMT）
     attn_tests = []
-    all_attn_models = attn_variants + [("Attention-MambaAMT-Enhanced", None)]
+    all_attn_models = attn_variants #+ [("Attention-MambaAMT-Enhanced", None)]
     for name, _ in all_attn_models:
         base_flat = np.array(attn_base_all_returns).flatten()
         variant_flat = np.array(attn_all_raw_returns[name]).flatten()
