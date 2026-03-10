@@ -35,12 +35,17 @@ def evaluate_model(model, test_x, test_y, criterion, device):
         mae = np.mean(np.abs(outputs_np - targets_np))
         r2 = 1 - (np.sum((targets_np - outputs_np) ** 2) / np.sum((targets_np - np.mean(targets_np)) ** 2))
         
-        if isinstance(criterion, nn.BCELoss):
-            binary_outputs = np.where(outputs_np > 0.5, 1, 0)
-            binary_targets = np.where(targets_np > 0.5, 1, 0)
-        else:
-            binary_outputs = np.where(outputs_np > 0, 1, 0)
-            binary_targets = np.where(targets_np > 0, 1, 0)
+        # ========== 核心修改：基于均值动态划分二分类 ==========
+        # 计算输出和目标各自的均值
+        outputs_mean = np.mean(outputs_np)
+        targets_mean = np.mean(targets_np)
+        print(outputs_mean)
+        print(targets_mean)
+
+        # 均值以上归为 1，均值以下归为 0（等于均值时归为 0）
+        binary_outputs = np.where(outputs_np > outputs_mean, 1, 0)
+        binary_targets = np.where(targets_np > targets_mean, 1, 0)
+        # ====================================================
         
         accuracy = np.mean(binary_outputs == binary_targets)
         
@@ -61,13 +66,18 @@ def evaluate_model(model, test_x, test_y, criterion, device):
             'accuracy': accuracy,
             'precision': precision,
             'recall': recall,
-            'f1': f1
+            'f1': f1,
+            # 新增：记录本次的均值阈值，方便后续分析
+            'outputs_mean': outputs_mean,
+            'targets_mean': targets_mean
         }
         
         print(f"Test Loss: {loss.item():.4f}, RMSE: {rmse:.4f}, Accuracy: {accuracy * 100:.2f}%")
         print(f"Precision: {precision:.4f}, Recall: {recall:.4f}, F1: {f1:.4f}")
+        print(f"Outputs Mean Threshold: {outputs_mean:.4f}, Targets Mean Threshold: {targets_mean:.4f}")
         
         return binary_outputs, metrics
+
 from datetime import datetime  # 新增：导入时间模块
 TIMESTAMP = datetime.now().strftime('%Y%m%d_%H%M%S')  # 格式：年月日_时分秒
 
@@ -159,12 +169,11 @@ def run_experiment(model_name, model_class, input_dim, train_x, train_y, test_x,
         'avg_return': avg_returns,
         'std_return': std_returns,
         'avg_accuracy': [avg_metrics['accuracy']] * len(STOCK_CODES),
-        'avg_rmse': [avg_metrics['rmse']] * len(STOCK_CODES)
+        'avg_rmse': [avg_metrics['rmse']] * len(STOCK_CODES),
+        # 新增：记录平均的均值阈值
+        'avg_outputs_mean': [avg_metrics['outputs_mean']] * len(STOCK_CODES),
+        'avg_targets_mean': [avg_metrics['targets_mean']] * len(STOCK_CODES)
     })
     repeat_results.to_excel(os.path.join(output_dir, f"{model_name}_repeat_results.xlsx"), index=False)
     
     return avg_returns, avg_metrics, all_returns
-
-# 导入必要的模块（需要放在文件末尾避免循环导入）
-import random
-from models import AdvancedMambaAMT, MLP, CombinedMLP, SelfAttention, SelfAttentionMamba, LSTMModel, CombinedLSTM
