@@ -1,28 +1,27 @@
-
+import numpy as np
+import pandas as pd
+from scipy.signal import savgol_filter
+import logging  # 确保导入logging模块
 
 class StandardTradingSimulator:
-    """量化基金级交易引擎（兼容模型训练器初始化版本）"""
+    """量化基金级交易引擎（纯回测版本）- 集成均值信号生成"""
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, df_scaled, y_pred, stock_code, trading_config, logger):
         """
-        兼容两种初始化方式：
-        方式1（交易引擎）: __init__(df_scaled, y_pred, stock_code, trading_config, logger)
-        方式2（模型训练器）: __init__(model, train_x, train_y, criterion, model_name, device, hyper_params, logger)
+        交易引擎初始化
+        参数:
+            df_scaled: 标准化后的股票数据DataFrame
+            y_pred: 原始预测值数组
+            stock_code: 股票代码
+            trading_config: 交易配置字典
+            logger: 日志记录器
         """
-        # 识别初始化类型
-        if len(args) >= 5 and isinstance(args[0], (pd.DataFrame, np.ndarray)):
-            # 交易引擎初始化
-            self._init_trading_simulator(*args, **kwargs)
-        elif len(args) >= 7 and isinstance(args[0], torch.nn.Module):
-            # 模型训练器初始化
-            self._init_model_trainer(*args, **kwargs)
-        else:
-            raise ValueError("无法识别初始化参数，请使用交易引擎或模型训练器的参数格式")
+        self._init_trading_simulator(df_scaled, y_pred, stock_code, trading_config, logger)
 
     def _init_trading_simulator(self, df_scaled, y_pred, stock_code, trading_config, logger):
-        """交易引擎初始化逻辑（激进版）"""
+        """交易引擎初始化逻辑"""
         self.df_scaled = df_scaled.reset_index(drop=True)
-        self.y_pred = np.array(y_pred)
+        self.y_pred_original = np.array(y_pred)  # 保存原始预测值
         self.stock_code = stock_code
         self.trading_config = trading_config
         self.logger = logger
@@ -33,7 +32,7 @@ class StandardTradingSimulator:
         self.position = 0
         self.avg_price = 0
 
-        # ====== 仓位管理（大幅放宽） ======
+        # ====== 仓位管理 ======
         self.base_position = trading_config.get("base_position", 0.2)
         self.max_position_ratio = trading_config.get("max_position_ratio", 0.9)
         self.vol_target = trading_config.get("vol_target", 0.02)
@@ -59,28 +58,92 @@ class StandardTradingSimulator:
         self.total_trading_cost = 0
         self.buy_count = 0
         self.sell_count = 0
+    def _log_message(self, msg):
 
-    def _init_model_trainer(self, model, train_x, train_y, criterion, model_name, device, hyper_params, logger):
-        """模型训练器初始化逻辑（原EnhancedModelTrainer）"""
-        self.model = model.to(device)
-        self.train_x = train_x.to(device)
-        self.train_y = train_y.to(device)
-        self.criterion = criterion
-        self.model_name = model_name
-        self.device = device
-        self.hyper_params = hyper_params
-        self.logger = logger
+        """兼容不同日志对象的统一日志方法（最终修复版）"""
+        if self.logger is None:
+            return
+        
+        # 清理消息格式
+        clean_msg = msg.strip()
+        
+        # 适配不同类型的日志对象（优先级：自定义DataStatistics > 标准Logger > 文件对象 > 打印）
+        if hasattr(self.logger, 'log'):
+            # 检测log方法的参数数量
+            import inspect
+            sig = inspect.signature(self.logger.log)
+            params = list(sig.parameters.values())
+            # 如果log方法只有self/1个参数，直接传消息
+            if len(params) <= 1:
+                self.logger.log(clean_msg)
+            # 如果是标准Logger的log方法（需要级别+消息）
+            else:
+                self.logger.log(logging.INFO, clean_msg)
+                    
 
+    
+
+    def _generate_trading_signal(self):
+        """
+        基于均值生成买卖信号 - 修复版（标准化统一尺度）
+        返回:
+            处理后的交易信号数组（1=看多, -1=看空, 0=持仓）
+        """
+        y_pred = self.y_pred_original.copy()
+        
+        # ========== 核心修复：先标准化预测值 ==========
+        y_pred_mean = np.mean(y_pred)
+        y_pred_std = np.std(y_pred)
+        # 避免除以0
+        if y_pred_std < 1e-8:
+            y_pred_std = 1e-8
+        # Z-score标准化：转换为均值0，标准差1的分布
+        y_pred_standardized = (y_pred - y_pred_mean) / y_pred_std
+        
+        # 1. 剔除异常值（标准化后±3σ）
+        y_pred_clean = np.clip(y_pred_standardized, -3, 3)
+        
+        # 2. 动态滑动窗口均值（基于标准化后的数据）
+        window_size = self.trading_config.get("signal_window", 30)
+        y_pred_series = pd.Series(y_pred_clean)
+        y_pred_rolling_mean = y_pred_series.rolling(
+            window=window_size, 
+            min_periods=max(1, window_size//2)
+        ).mean().fillna(0)  # 标准化后均值应为0
+        
+        # 3. 趋势过滤（5日均线向上）
+        ma5 = y_pred_series.rolling(window=5, min_periods=1).mean()
+        trend = np.where(ma5 > ma5.shift(1).fillna(ma5.iloc[0]), 1, 0)
+        
+        # 4. 生成三态信号（带缓冲带避免频繁交易）
+        buffer_ratio = self.trading_config.get("signal_buffer", 0.05)
+        # 基于标准化后的数据设置阈值（缓冲带用固定值更合理）
+        upper_threshold = y_pred_rolling_mean + buffer_ratio * 1  # 1是标准化后的标准差
+        lower_threshold = y_pred_rolling_mean - buffer_ratio * 1
+        
+        # 生成基础信号
+        signal = np.where(
+            (y_pred_clean > upper_threshold) & (trend == 1), 1.0,  # 买入信号
+            np.where(y_pred_clean < lower_threshold, -1.0, 0.0)   # 卖出/持仓信号
+        )
+        
+        # 5. 信号平滑（减少噪音）
+        if len(signal) > 5:
+            signal = savgol_filter(signal, window_length=5, polyorder=1)
+        
+        return signal
     # =========================
     # 交易引擎核心方法
     # =========================
     def calculate_trading_cost(self, trade_value, is_sell=True):
+        """计算交易成本"""
         commission = max(trade_value * self.commission_rate, self.min_commission)
         slippage = trade_value * self.slippage_rate
         stamp_tax = trade_value * self.stamp_tax if is_sell else 0
         return commission + slippage + stamp_tax
 
     def risk_control(self, price):
+        """风控检查（止损/止盈）"""
         if self.position == 0:
             return None
         pnl = (price - self.avg_price) / self.avg_price
@@ -91,6 +154,7 @@ class StandardTradingSimulator:
         return None
 
     def vol_adjusted_position(self, signal, hist_prices):
+        """波动率调整仓位"""
         if len(hist_prices) < 5:
             vol_scaling = 1.0
         else:
@@ -102,6 +166,7 @@ class StandardTradingSimulator:
         return np.clip(target_ratio, 0, self.max_position_ratio)
 
     def target_position_shares(self, price, signal, hist_prices):
+        """计算目标持仓数量"""
         target_ratio = self.vol_adjusted_position(signal, hist_prices)
         capital = self.cash + self.position * price
         
@@ -120,6 +185,7 @@ class StandardTradingSimulator:
         return shares
 
     def buy(self, price, shares):
+        """买入股票"""
         if shares <= 0:
             return False
         
@@ -154,12 +220,12 @@ class StandardTradingSimulator:
         self.buy_count += 1
         self.total_trading_cost += cost
         
-        if self.logger:
-            self.logger.write(f"[{self.stock_code}] 买入 {shares} 股，价格 {price:.2f}，剩余现金 {self.cash:.2f}\n")
+        self._log_message(f"[{self.stock_code}] 买入 {shares} 股，价格 {price:.2f}，剩余现金 {self.cash:.2f}")
         
         return True
 
     def sell(self, price, fraction=1.0):
+        """卖出股票"""
         if self.position == 0:
             return 0
         
@@ -181,26 +247,27 @@ class StandardTradingSimulator:
         self.sell_count += 1
         self.total_trading_cost += cost
         
-        if self.logger:
-            self.logger.write(f"[{self.stock_code}] 卖出 {shares} 股，价格 {price:.2f}，获利 {profit:.2f}\n")
+        self._log_message(f"[{self.stock_code}] 卖出 {shares} 股，价格 {price:.2f}，获利 {profit:.2f}")
         
         return profit
 
     def simulate(self):
+        """执行交易模拟回测"""
         hist_prices = []
         profits = []
         strategies = []
 
-        y_pred_original = self.y_pred.copy()
-        self.y_pred = (self.y_pred - np.mean(self.y_pred)) / (np.std(self.y_pred) + 1e-8)
-        self.y_pred = self.y_pred * 2.0
+        # 生成基于均值的交易信号
+        self.y_pred = self._generate_trading_signal()
         
+        # 趋势增强（可选）
         if len(self.y_pred) > 5:
             ma_short = pd.Series(self.y_pred).rolling(window=3).mean().fillna(0).values
             ma_long = pd.Series(self.y_pred).rolling(window=10).mean().fillna(0).values
             trend_signal = np.where(ma_short > ma_long, 1.0, -1.0)
             self.y_pred = self.y_pred * 0.7 + trend_signal * 0.3
 
+        # 逐行执行交易
         for i, row in self.df_scaled.iterrows():
             price = row['当日开盘'] if '当日开盘' in row else row.iloc[0]
             pred = self.y_pred[i]
@@ -210,6 +277,7 @@ class StandardTradingSimulator:
 
             hist_prices.append(price)
 
+            # 风控检查
             risk = self.risk_control(price)
             if risk == "stop_loss":
                 profit = self.sell(price)
@@ -220,8 +288,10 @@ class StandardTradingSimulator:
                 daily_return = profit / self.initial_capital
                 strategy = "TakeProfit"
             else:
+                # 计算目标仓位
                 shares = self.target_position_shares(price, pred, hist_prices)
                 
+                # 定期调仓检查
                 if i % 10 == 0:
                     current_ratio = (self.position * price) / (self.cash + self.position * price + 1e-8)
                     target_ratio = self.vol_adjusted_position(pred, hist_prices)
@@ -233,6 +303,7 @@ class StandardTradingSimulator:
                             needed_value = (self.cash + self.position * price) * (current_ratio - target_ratio)
                             shares = min(shares, -int(needed_value / price))
 
+                # 执行交易
                 if shares > 0:
                     success = self.buy(price, shares)
                     if success:
@@ -246,17 +317,20 @@ class StandardTradingSimulator:
                 else:
                     strategy = "Hold"
 
+            # 记录资产曲线
             equity = self.cash + self.position * price
             self.equity_curve.append(equity)
             profits.append(daily_return)
             strategies.append(strategy)
 
+        # 强制平仓剩余仓位
         if self.position > 0:
-            last_price = self.df_scaled.iloc[-1]['当日开盘']
+            last_price = self.df_scaled.iloc[-1]['当日开盘'] if '当日开盘' in self.df_scaled.columns else self.df_scaled.iloc[-1].iloc[0]
             profit = self.sell(last_price)
             profits[-1] += profit / self.initial_capital
             strategies[-1] = "Sell (Force)"
 
+        # 计算回测指标
         equity = np.array(self.equity_curve)
         returns = np.diff(equity) / equity[:-1] if len(equity) > 1 else np.array([0])
         cumulative_return = (equity - self.initial_capital) / self.initial_capital
@@ -264,132 +338,47 @@ class StandardTradingSimulator:
         cummax = np.maximum.accumulate(equity)
         drawdown = (equity - cummax)/cummax
         max_drawdown = drawdown.min()
-        total_return = cumulative_return[-1]
+        total_return = cumulative_return[-1] if len(cumulative_return) > 0 else 0
         avg_trade_cost = self.total_trading_cost / self.trade_count if self.trade_count > 0 else 0
 
+        # 保存结果到DataFrame
         self.df_scaled['Return Rate'] = profits
         self.df_scaled['Strategy'] = strategies
-        self.df_scaled['Predicted Value'] = y_pred_original
-        self.df_scaled['Enhanced Signal'] = self.y_pred
+        self.df_scaled['Original Prediction'] = self.y_pred_original
+        self.df_scaled['Trading Signal'] = self.y_pred
         self.df_scaled['Cumulative Return'] = cumulative_return
 
-        if self.logger:
-            self.logger.write(f"\n{self.stock_code} 量化基金级交易统计:\n")
-            self.logger.write(f"总交易次数: {self.trade_count}\n")
-            self.logger.write(f"买入次数: {self.buy_count}\n")
-            self.logger.write(f"卖出次数: {self.sell_count}\n")
-            self.logger.write(f"买卖比: {self.buy_count/max(1, self.sell_count):.2f}\n")
-            self.logger.write(f"总交易成本: {self.total_trading_cost:.2f}\n")
-            self.logger.write(f"平均交易成本: {avg_trade_cost:.2f}\n")
-            self.logger.write(f"总收益率: {total_return:.4f}\n")
-            self.logger.write(f"Sharpe Ratio: {sharpe:.3f}\n")
-            self.logger.write(f"最大回撤: {max_drawdown:.3f}\n\n")
+        # 记录日志
+        self._log_message(f"\n{self.stock_code} 量化基金级交易统计:")
+        self._log_message(f"总交易次数: {self.trade_count}")
+        self._log_message(f"买入次数: {self.buy_count}")
+        self._log_message(f"卖出次数: {self.sell_count}")
+        self._log_message(f"买卖比: {self.buy_count/max(1, self.sell_count):.2f}")
+        self._log_message(f"总交易成本: {self.total_trading_cost:.2f}")
+        self._log_message(f"平均交易成本: {avg_trade_cost:.2f}")
+        self._log_message(f"总收益率: {total_return:.4f}")
+        self._log_message(f"Sharpe Ratio: {sharpe:.3f}")
+        self._log_message(f"最大回撤: {max_drawdown:.3f}")
 
         return self.df_scaled, total_return
-
-    # =========================
-    # 模型训练器核心方法
-    # =========================
-    def train(self):
-        """原EnhancedModelTrainer的train方法"""
-        # MambaAMT专属优化器配置
-        if "MambaAMT" in self.model_name:
-            optimizer = optim.AdamW(
-                self.model.parameters(), 
-                lr=self.hyper_params['mambaamt_lr'],
-                weight_decay=self.hyper_params['mambaamt_weight_decay'],
-                betas=(0.9, 0.999),
-                eps=1e-8
-            )
-            scheduler = CosineAnnealingLR(
-                optimizer, 
-                T_max=self.hyper_params['num_epochs'],
-                eta_min=self.hyper_params['mambaamt_lr'] * 0.01
-            )
-        else:
-            optimizer = optim.Adam(
-                self.model.parameters(), 
-                lr=self.hyper_params['learning_rate'],
-                weight_decay=self.hyper_params['weight_decay']
-            )
-            scheduler = StepLR(
-                optimizer, 
-                step_size=self.hyper_params['step_size'],
-                gamma=self.hyper_params['gamma']
-            )
-        
-        train_losses = []
-        best_loss = float('inf')
-        patience = 10
-        patience_counter = 0
-        
-        for epoch in range(self.hyper_params['num_epochs']):
-            self.model.train()
-            optimizer.zero_grad()
-            
-            if epoch == 0:
-                self.logger.write(f"{self.model_name} 输入形状: {self.train_x.shape}\n")
-            
-            outputs = self.model(self.train_x)
-            
-            if epoch == 0:
-                self.logger.write(f"{self.model_name} 输出形状: {outputs.shape}\n")
-                self.logger.write(f"{self.model_name} 标签形状: {self.train_y.shape}\n")
-                if torch.isnan(outputs).any():
-                    self.logger.write(f"警告：{self.model_name} 输出包含NaN值！\n")
-                    print(f"警告：{self.model_name} 输出包含NaN值！")
-                self.logger.write(f"{self.model_name} 输出范围: [{torch.min(outputs):.4f}, {torch.max(outputs):.4f}]\n")
-                self.logger.write(f"{self.model_name} 标签范围: [{torch.min(self.train_y):.4f}, {torch.max(self.train_y):.4f}]\n")
-            
-            if outputs.shape != self.train_y.shape:
-                outputs = outputs.view(self.train_y.shape)
-            
-            loss = self.criterion(outputs, self.train_y)
-            
-            # MambaAMT梯度裁剪更严格
-            if "MambaAMT" in self.model_name:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.5)
-            else:
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            
-            train_losses.append(loss.item())
-            
-            # 早停机制（仅MambaAMT）
-            if "MambaAMT" in self.model_name:
-                if loss.item() < best_loss:
-                    best_loss = loss.item()
-                    patience_counter = 0
-                    # 保存最佳模型
-                    torch.save(self.model.state_dict(), f'best_mambaamt_model.pth')
-                else:
-                    patience_counter += 1
-                    if patience_counter >= patience:
-                        self.logger.write(f"早停触发，停止训练在epoch {epoch+1}\n")
-                        break
-            
-            if (epoch + 1) % 10 == 0:
-                self.logger.write(f"[{self.model_name}] Epoch {epoch + 1}/{self.hyper_params['num_epochs']}, Loss: {loss.item():.4f}\n")
-                self.logger.flush()
-        
-        # 加载MambaAMT最佳模型
-        if "MambaAMT" in self.model_name and os.path.exists('best_mambaamt_model.pth'):
-            self.model.load_state_dict(torch.load('best_mambaamt_model.pth'))
-            self.logger.write(f"加载MambaAMT最佳模型，最佳损失: {best_loss:.4f}\n")
-        
-        return self.model, train_losses
-
-# 保持类名统一
-EnhancedModelTrainer = StandardTradingSimulator
 
 # ===============================
 # 工厂函数
 # ===============================
 def get_trading_simulator(model_name, df_scaled, y_pred, stock_code, trading_config, logger):
-    # 更新默认配置
+    """
+    创建交易模拟器实例的工厂函数
+    参数:
+        model_name: 模型名称（仅用于日志）
+        df_scaled: 标准化数据
+        y_pred: 原始预测值
+        stock_code: 股票代码
+        trading_config: 交易配置
+        logger: 日志器
+    返回:
+        StandardTradingSimulator实例
+    """
+    # 设置默认配置（新增信号相关配置）
     default_config = {
         "initial_capital": 1_000_000,
         "base_position": 0.2,
@@ -404,19 +393,14 @@ def get_trading_simulator(model_name, df_scaled, y_pred, stock_code, trading_con
         "commission_rate": 0.0003,
         "slippage_rate": 0.0002,
         "stamp_tax": 0.001,
-        "min_commission": 5
+        "min_commission": 5,
+        "signal_window": 30,    # 信号滑动窗口大小
+        "signal_buffer": 0.05   # 信号缓冲带比例
     }
+    
+    # 合并用户配置和默认配置
     for key, value in default_config.items():
         if key not in trading_config:
             trading_config[key] = value
     
     return StandardTradingSimulator(df_scaled, y_pred, stock_code, trading_config, logger)
-
-
-import numpy as np
-import pandas as pd
-from scipy.signal import savgol_filter
-import torch
-import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
-import os
