@@ -124,17 +124,39 @@ def run_experiment(model_name, model_class, input_dim, train_x, train_y, test_x,
         returns = []
         CSV_FILES = sorted([f for f in os.listdir(data_dir) if f.endswith('_processed_data.csv')])
         STOCK_CODES = [f.split('_')[0] for f in CSV_FILES]
-        
+# ===============================
+# 将预测 reshape 成 (股票数, 测试长度)
+# ===============================
+
+        num_stocks = len(CSV_FILES)
+        test_preds = np.array(test_preds).reshape(num_stocks, -1)
+
         for i, file_name in enumerate(CSV_FILES):
+
+            # 读取股票数据
             df = pd.read_csv(os.path.join(data_dir, file_name))
+
             train_size = int(df.shape[0] * (1 - test_size))
-            df_test = df.iloc[train_size:, :].reset_index(drop=True)
-            
+
+            df_test = df.iloc[train_size:].reset_index(drop=True)
+
             stock_code = file_name.split('_')[0]
-            pred_flat = test_preds[i].flatten()[:len(df_test)]
-            
+
+            # ===============================
+            # 直接按股票取预测
+            # ===============================
+
+            pred_flat = test_preds[i].flatten()
+
+            # 如果长度不一致，进行截断
+            if len(pred_flat) > len(df_test):
+                pred_flat = pred_flat[:len(df_test)]
+
+            # print(stock_code, len(pred_flat))
+            # print(pred_flat[:10])
+
             if len(pred_flat) > 0:
-                # 【核心修改】使用工厂函数获取对应的交易模拟器
+
                 sim = get_trading_simulator(
                     model_name=model_name,
                     df_scaled=df_test.copy(),
@@ -143,11 +165,19 @@ def run_experiment(model_name, model_class, input_dim, train_x, train_y, test_x,
                     trading_config=trading_config,
                     logger=logger.logger
                 )
+
                 df_result, total_return = sim.simulate()
-                
-                df_result.to_excel(os.path.join(output_dir, f"{model_name}_repeat_{repeat+1}_{stock_code}.xlsx"), index=False)
+
+                df_result.to_excel(
+                    os.path.join(
+                        output_dir,
+                        f"{model_name}_repeat_{repeat+1}_{stock_code}.xlsx"
+                    ),
+                    index=False
+                )
+
                 returns.append(total_return)
-        
+
         all_returns.append(returns)
     
     avg_returns = np.mean(all_returns, axis=0)

@@ -1,10 +1,4 @@
-import numpy as np
-import pandas as pd
-from scipy.signal import savgol_filter
-import torch
-import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
-import os
+
 
 class StandardTradingSimulator:
     """量化基金级交易引擎（兼容模型训练器初始化版本）"""
@@ -417,3 +411,12 @@ def get_trading_simulator(model_name, df_scaled, y_pred, stock_code, trading_con
             trading_config[key] = value
     
     return StandardTradingSimulator(df_scaled, y_pred, stock_code, trading_config, logger)
+
+
+import numpy as np
+import pandas as pd
+from scipy.signal import savgol_filter
+import torch
+import torch.optim as optim
+from torch.optim.lr_scheduler import CosineAnnealingLR, StepLR
+import os
