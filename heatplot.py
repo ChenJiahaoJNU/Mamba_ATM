@@ -60,64 +60,71 @@ def create_100_symmetric_matrix(df, models, model_to_idx, value_col):
     print(f"✅ {value_col} - Strict symmetric matrix created (size: {n}x{n})")
     return matrix
 
-# ======================== Heatmap Plot (Visual Symmetry Guarantee) ========================
-def plot_symmetric_heatmap(t_matrix, w_matrix, models, save_path):
+# ======================== Heatmap Plot (Separate Figures) ========================
+def plot_separate_heatmaps(t_matrix, w_matrix, models, save_base_path):
     """
-    Plot strictly symmetric heatmap (visual layer)
+    Plot t-test and Wilcoxon test heatmaps as SEPARATE figures
     :param t_matrix: t-test symmetric matrix
     :param w_matrix: Wilcoxon test symmetric matrix
     :param models: Sorted model list
-    :param save_path: Save path for heatmap
+    :param save_base_path: Base path for saving (e.g., './analysis/model_heatmap_')
     """
     n = len(models)
     # Professional color map: Red(Significant) → White → Blue(Non-significant)
     colors = ['#D73027', '#F46D43', '#FEE090', '#E0F3F8', '#ABD9E9', '#74ADD1', '#4575B4']
     cmap = LinearSegmentedColormap.from_list('sig_cmap', colors, N=256)
     
-    # Create figure with EQUAL aspect ratio (key for visual symmetry)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(28, 12), constrained_layout=True)
-    fig.suptitle('Model Pairwise Comparison Test - p-value Heatmap', 
-                 fontsize=24, fontweight='bold', y=1.02)
-    
-    # ---------------- Common plot function (unify style, avoid visual bias) ----------------
-    def plot_single_heatmap(ax, matrix, title):
+    # ---------------- Common plot function (unify style) ----------------
+    def plot_single_heatmap(matrix, title, save_path):
+        # Create independent figure with EQUAL aspect ratio
+        fig, ax = plt.subplots(1, 1, figsize=(16, 14), constrained_layout=True)
+        fig.suptitle(f'Model Pairwise Comparison Test - {title}', 
+                     fontsize=20, fontweight='bold', y=1.02)
+        
         # Plot with EQUAL aspect (100% visual symmetry)
         im = ax.imshow(matrix, cmap=cmap, aspect='equal', vmin=0, vmax=0.05)
-        ax.set_title(title, fontsize=18, fontweight='bold', pad=20)
         
-        # Set ticks (unify font size/rotation for x/y)
+        # Set ticks (unify font size/rotation)
         ax.set_xticks(range(n))
         ax.set_yticks(range(n))
-        ax.set_xticklabels(models, rotation=45, ha='right', fontsize=10, fontweight='medium')
-        ax.set_yticklabels(models, fontsize=10, fontweight='medium')
+        ax.set_xticklabels(models, rotation=45, ha='right', fontsize=12, fontweight='medium')
+        ax.set_yticklabels(models, fontsize=12, fontweight='medium')
         
-        # Add white grid line (separate cells, no visual interference)
+        # Add white grid line (separate cells)
         for i in range(n):
             ax.axhline(i-0.5, color='white', linewidth=0.4)
             ax.axvline(i-0.5, color='white', linewidth=0.4)
         
-        # Color bar (unify style)
+        # Color bar
         cbar = plt.colorbar(im, ax=ax, shrink=0.9, aspect=40, pad=0.03)
         cbar.set_label('p-value', fontsize=14, fontweight='bold')
         cbar.set_ticks([0, 0.01, 0.02, 0.03, 0.04, 0.05])
         cbar.set_ticklabels(['0.00', '0.01', '0.02', '0.03', '0.04', '0.05'], fontsize=12)
-        return im
+        
+        # Add subtitle explanation
+        ax.text(0.5, -0.1, 'Red: p<0.05 (Significant) | Blue: p≥0.05 (Non-significant)', 
+                transform=ax.transAxes, ha='center', fontsize=12, fontweight='medium')
+        
+        # Save high-resolution heatmap
+        plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
+        plt.close()
+        print(f"✅ Heatmap saved to: {save_path}")
     
-    # ---------------- Plot t-test and Wilcoxon test heatmap ----------------
-    plot_single_heatmap(ax1, t_matrix, 't-test\n(Red: p<0.05 Significant | Blue: p≥0.05 Non-significant)')
-    plot_single_heatmap(ax2, w_matrix, 'Wilcoxon Test\n(Red: p<0.05 Significant | Blue: p≥0.05 Non-significant)')
+    # ---------------- Plot and save separate heatmaps ----------------
+    # Save t-test heatmap
+    t_save_path = f"{save_base_path}t_test.png"
+    plot_single_heatmap(t_matrix, 't-test p-value Heatmap', t_save_path)
     
-    # Save high-resolution heatmap (no white border)
-    plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-    plt.close()
-    print(f"✅ Heatmap saved to: {save_path}")
+    # Save Wilcoxon test heatmap
+    w_save_path = f"{save_base_path}wilcoxon_test.png"
+    plot_single_heatmap(w_matrix, 'Wilcoxon Test p-value Heatmap', w_save_path)
 
 # ======================== Main Function ========================
 def main():
     # ---------------- Modify only these 3 parameters ----------------
     EXCEL_PATH = './out/all_models_pairwise_tests_results.xlsx'
     SHEET_NAME = '全量两两检验'  # Only for reading, no display in plot
-    SAVE_PATH = './analysis/model_pairwise_heatmap_symmetric.png'
+    SAVE_BASE_PATH = './analysis/model_pairwise_heatmap_'  # Base path for separate files
     # -----------------------------------------------------------------
     
     # Step 1: Read data
@@ -125,9 +132,9 @@ def main():
     # Step 2: Create 100% symmetric matrix (data layer)
     t_test_mat = create_100_symmetric_matrix(df, all_models, model_to_idx, 't检验p值')
     wilcoxon_mat = create_100_symmetric_matrix(df, all_models, model_to_idx, 'Wilcoxon p值')
-    # Step 3: Plot symmetric heatmap (visual layer)
-    plot_symmetric_heatmap(t_test_mat, wilcoxon_mat, all_models, SAVE_PATH)
-    print("\n🎉 All done! Strict symmetric heatmap generated successfully.")
+    # Step 3: Plot and save separate heatmaps
+    plot_separate_heatmaps(t_test_mat, wilcoxon_mat, all_models, SAVE_BASE_PATH)
+    print("\n🎉 All done! Separate symmetric heatmaps generated successfully.")
 
 # ======================== Run Code ========================
 if __name__ == '__main__':

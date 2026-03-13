@@ -161,7 +161,8 @@ if __name__ == "__main__":
         mlp_tests.append(ttest_result)
         
         wilcoxon_result = stat_test.wilcoxon_test(base_flat, variant_flat, "MLP_Base", name[0])
-        mlp_tests.append(wilcoxon_result)
+        if wilcoxon_result is not None:  # 增加空值判断
+            mlp_tests.append(wilcoxon_result)
     
     mlp_results = pd.DataFrame(mlp_all_returns, index=STOCK_CODES)
     mlp_results.index.name = 'Stock Code'
@@ -216,7 +217,8 @@ if __name__ == "__main__":
         attn_tests.append(ttest_result)
         
         wilcoxon_result = stat_test.wilcoxon_test(base_flat, variant_flat, "Attention_Base", name)
-        attn_tests.append(wilcoxon_result)
+        if wilcoxon_result is not None:  # 增加空值判断
+            attn_tests.append(wilcoxon_result)
     
     attn_results = pd.DataFrame(attn_all_returns, index=STOCK_CODES)
     attn_results.index.name = 'Stock Code'
@@ -259,7 +261,8 @@ if __name__ == "__main__":
         lstm_tests.append(ttest_result)
         
         wilcoxon_result = stat_test.wilcoxon_test(base_flat, variant_flat, "LSTM_Base", name[0])
-        lstm_tests.append(wilcoxon_result)
+        if wilcoxon_result is not None:  # 增加空值判断
+            lstm_tests.append(wilcoxon_result)
     
     lstm_results = pd.DataFrame(lstm_all_returns, index=STOCK_CODES)
     lstm_results.index.name = 'Stock Code'
@@ -267,6 +270,8 @@ if __name__ == "__main__":
     
     # ===================== 汇总所有统计检验结果 =====================
     all_tests = mlp_tests + attn_tests + lstm_tests
+    # 过滤掉None值
+    all_tests = [test for test in all_tests if test is not None]
     stat_test.summarize_significance(all_tests, OUTPUT_DIR)
     
     # ===================== 最终结果汇总 =====================
@@ -299,5 +304,79 @@ if __name__ == "__main__":
     all_results = pd.DataFrame(all_results_data)
     all_results.to_excel(os.path.join(OUTPUT_DIR, 'all_models_combined_results.xlsx'), index=False)
     
+    # ===================== 新增：全量模型两两对比检验 =====================
+    stats_logger.log("\n=== 开始全量模型两两对比检验 ===")
+    
+    # 整合所有模型的原始收益数据
+    all_raw_returns = {}
+    # 添加MLP系列
+    for model_name in mlp_all_raw_returns.keys():
+        all_raw_returns[model_name] = np.array(mlp_all_raw_returns[model_name]).flatten()
+    # 添加Attention系列
+    for model_name in attn_all_raw_returns.keys():
+        all_raw_returns[model_name] = np.array(attn_all_raw_returns[model_name]).flatten()
+    # 添加LSTM系列
+    for model_name in lstm_all_raw_returns.keys():
+        all_raw_returns[model_name] = np.array(lstm_all_raw_returns[model_name]).flatten()
+    
+    # 获取排序后的模型列表（保证一致性）
+    sorted_model_names = sorted(all_raw_returns.keys())
+    stats_logger.log(f"参与两两对比的模型总数: {len(sorted_model_names)}")
+    stats_logger.log(f"模型列表: {sorted_model_names}")
+    
+    # 初始化两两检验结果列表
+    pairwise_test_results = []
+    
+    # 生成所有两两组合（包括A-B和B-A，保证对称性）
+    for i, model_a in enumerate(sorted_model_names):
+        for j, model_b in enumerate(sorted_model_names):
+            # 跳过自身对比（后续在热图中会设为1.0）
+            if i == j:
+                continue
+                
+            # 获取两个模型的收益数据
+            returns_a = all_raw_returns[model_a]
+            returns_b = all_raw_returns[model_b]
+            
+            # 执行配对t检验和Wilcoxon检验
+            ttest_res = stat_test.paired_ttest(returns_a, returns_b, model_a, model_b)
+            wilcoxon_res = stat_test.wilcoxon_test(returns_a, returns_b, model_a, model_b)
+            
+            # 处理Wilcoxon检验可能返回None的情况
+            if wilcoxon_res is None:
+                wilcoxon_w = np.nan
+                wilcoxon_p = 1.0
+                wilcoxon_significant = False
+            else:
+                wilcoxon_w = wilcoxon_res['w_statistic']  # 修正键名：statistic → w_statistic
+                wilcoxon_p = wilcoxon_res['p_value']
+                wilcoxon_significant = wilcoxon_res['significant']
+            
+            # 提取检验结果
+            pairwise_test_results.append({
+                '模型A': model_a,
+                '模型B': model_b,
+                't检验统计量': ttest_res['t_statistic'],
+                't检验p值': ttest_res['p_value'],
+                't检验是否显著': ttest_res['significant'],
+                'Wilcoxon统计量': wilcoxon_w,
+                'Wilcoxon p值': wilcoxon_p,
+                'Wilcoxon是否显著': wilcoxon_significant
+            })
+    
+    # 转换为DataFrame并去重（保证数据整洁）
+    pairwise_df = pd.DataFrame(pairwise_test_results).drop_duplicates(
+        subset=['模型A', '模型B'], keep='first'
+    )
+    
+    # 保存两两检验结果到Excel
+    pairwise_excel_path = os.path.join(OUTPUT_DIR, 'all_models_pairwise_tests_results.xlsx')
+    with pd.ExcelWriter(pairwise_excel_path, engine='openpyxl') as writer:
+        pairwise_df.to_excel(writer, sheet_name='全量两两检验', index=False)
+    
+    stats_logger.log(f"全量模型两两检验结果已保存至: {pairwise_excel_path}")
+    stats_logger.log(f"生成的检验记录数: {len(pairwise_df)}")
+    
+    # ===================== 实验结束 =====================
     stats_logger.log("=== 所有实验完成 ===")
     stats_logger.logger.close()
