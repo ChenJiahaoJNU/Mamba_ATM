@@ -1,6 +1,5 @@
 # MambaATM: A Framework for Automated Trading with Mamba
 
-## Author：Jiahao Chen, Jinan university
 
 ## Install Guide
 
