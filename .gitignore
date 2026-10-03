@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# run outputs
+out/
+logs/
+analysis/
+pre_data/
+wandb/
+*.synctex.gz
+
+# checkpoints and data files that should not be committed
+*.pt
+*.pth
+*.ckpt
+*.whl
