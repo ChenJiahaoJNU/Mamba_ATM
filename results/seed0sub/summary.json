@@ -56,7 +56,7 @@
     "buy_hold_mdd_median": 0.6267662880357726
   },
   "config": {
-    "panel": "D:\\研究生学习资料\\暨南大学-博士学习资料\\论文\\重投\\MambaATM\\代码\\data_panel_adj",
+    "panel": ".\\data\\adj",
     "models": "gatedfusion",
     "seq": 60,
     "folds": 5,
@@ -66,7 +66,7 @@
     "stocks": "000001.SZ,000025.SZ,000043.SZ,000070.SZ,000301.SZ,000430.SZ,000529.SZ,000550.SZ,000586.SZ,000607.SZ,000631.SZ,000676.SZ,000697.SZ,000718.SZ,000751.SZ,000793.SZ,000823.SZ,000859.SZ,000886.SZ,000910.SZ,000931.SZ,000961.SZ,000985.SZ,002010.SZ,002028.SZ,002046.SZ,002064.SZ,002085.SZ,002103.SZ,002121.SZ,002139.SZ,002157.SZ,002178.SZ,002196.SZ,002214.SZ,002232.SZ,002250.SZ,002268.SZ,002286.SZ",
     "workers": 4,
     "device": "cuda",
-    "out": "D:\\研究生学习资料\\暨南大学-博士学习资料\\论文\\重投\\MambaATM\\_rework\\out\\seed0sub"
+    "out": ".\\results\\seed0sub"
   },
   "skipped": [],
   "errors": [],

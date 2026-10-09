@@ -26,8 +26,8 @@ def causality_test(model, seq_len=120, features=16, cutoff=60, scale=10.0, devic
 
 
 if __name__ == "__main__":
-    sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
-    sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\code")
+    sys.path.insert(0, r".\libs")
+    sys.path.insert(0, r".\code")
     from ssm_branch import SelectiveSSMBranch
 
     dev = "cuda" if torch.cuda.is_available() else "cpu"

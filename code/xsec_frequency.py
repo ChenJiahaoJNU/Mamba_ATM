@@ -28,8 +28,8 @@ sys.path.insert(0, HERE)
 
 import xsection as X  # noqa: E402
 
-DEFAULT_PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-                 r"\代码\data_panel_adj")
+DEFAULT_PANEL = (r"."
+                 r"\data\adj")
 
 
 def daily_book(scores, y, date_idx, stock_ids, tradable, quantile, rebalance, min_names=10):

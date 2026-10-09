@@ -5,7 +5,7 @@ import sys
 
 import torch
 
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
+sys.path.insert(0, r".\libs")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import model_zoo  # noqa: E402

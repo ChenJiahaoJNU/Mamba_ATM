@@ -23,8 +23,8 @@ sys.path.insert(0, HERE)
 import costs as C  # noqa: E402
 import xsection as X  # noqa: E402
 
-DEFAULT_PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-                 r"\代码\data_panel_adj")
+DEFAULT_PANEL = (r"."
+                 r"\data\adj")
 AUM_SIZES = [1e7, 1e8, 5e8, 1e9]
 
 

@@ -6,10 +6,10 @@
 #   _mambaatm_snjnl\rework\response_to_reviewers_filled.md
 
 $ErrorActionPreference = "Stop"
-$root = "D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-$w = "$root\_rework"
+$root = "."
+$w = "$root"
 $m = "$root\_mambaatm_snjnl\rework"
-$panel = "$root\代码\data_panel_adj"
+$panel = "$root\data\adj"
 $py = "C:\ProgramData\anaconda3\envs\rl1\python.exe"
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONPATH = "$w\libs"

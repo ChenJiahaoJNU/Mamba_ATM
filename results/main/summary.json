@@ -434,7 +434,7 @@
     "buy_hold_mdd_median": 0.6343670577184981
   },
   "config": {
-    "panel": "D:\\研究生学习资料\\暨南大学-博士学习资料\\论文\\重投\\MambaATM\\代码\\data_panel_adj",
+    "panel": ".\\data\\adj",
     "models": "mlp,lstm,attention+conv,dlinear,patchtst,itransformer,timesnet,ssm-only,gatedfusion,gatedfusion-guided",
     "seq": 60,
     "folds": 5,
@@ -444,7 +444,7 @@
     "stocks": "",
     "workers": 6,
     "device": "cuda",
-    "out": "D:\\研究生学习资料\\暨南大学-博士学习资料\\论文\\重投\\MambaATM\\_rework\\out\\main"
+    "out": ".\\results\\main"
   },
   "skipped": [],
   "errors": [],

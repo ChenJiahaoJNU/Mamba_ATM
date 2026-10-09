@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 
-REWORK = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_mambaatm_snjnl\rework")
+REWORK = (r".\_mambaatm_snjnl\rework")
 TMP = os.path.join(os.environ["TEMP"], "evos_check")
 
 
@@ -31,15 +31,15 @@ def main():
     print("\n== anonymity of the manuscript ==")
     hard = []
     for label, pat in [("author block", r"\\author\*?\["), ("e-mail", r"[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+"),
-                       ("affiliation", r"Jinan University|暨南"), ("funding", r"Outstanding Innovative|2025CXY"),
-                       ("personal repository", r"ChenJiahaoJNU|Changahou"),
-                       ("ORCID", r"ORCID|0000-0003")]:
+                       ("affiliation", r"UNIVERSITY|AFFILIATION"), ("funding", r"FUNDING_BODY|GRANT_ID"),
+                       ("personal repository", r"REPO_ACCOUNT|HF_ACCOUNT"),
+                       ("ORCID", r"ORCID|ORCID_ID")]:
         hit = re.search(pat, tex)
         print(f"  {label}: " + ("FOUND - fix" if hit else "absent"))
         if hit:
             hard.append(label)
     bib = read(os.path.join(REWORK, "sn-bibliography.bib"))
-    selfcite = re.search(r"author=\{Chen, Jiahao", bib)
+    selfcite = re.search(r"author=\{SURNAME, GIVEN", bib)
     print("  self-citation in the bibliography: " + ("present (third person in the text)" if selfcite
                                                      else "absent"))
 

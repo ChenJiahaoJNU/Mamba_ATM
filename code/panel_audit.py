@@ -24,8 +24,8 @@ import sys
 import numpy as np
 import pandas as pd
 
-DEFAULT_PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-                 r"\代码\data_panel_adj")
+DEFAULT_PANEL = (r"."
+                 r"\data\adj")
 FEATURE_COLS = ["当日开盘", "收盘价", "最高价", "最低价", "成交量", "成交额", "换手率", "昨收"]
 RET_COL = "涨跌幅"
 

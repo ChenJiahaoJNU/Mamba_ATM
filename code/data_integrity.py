@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 sys.stdout.reconfigure(encoding="utf-8")
-DATA = r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\data"
+DATA = r".\data"
 
 print("==================== is 涨跌幅 = close/prevclose - 1? ====================")
 print("%-8s %14s %14s %14s" % ("stock", "corr(implied,r)", "mean|diff|", "max|diff|"))

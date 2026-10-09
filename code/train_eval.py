@@ -11,8 +11,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\code")
+sys.path.insert(0, r".\libs")
+sys.path.insert(0, r".\code")
 
 import model_zoo  # noqa: E402
 import pipeline as P  # noqa: E402
@@ -94,7 +94,7 @@ def reference_points(yc, yr):
 
 
 def main():
-    DATA = r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\data"
+    DATA = r".\data"
     SEQ, FOLDS, EPOCHS = 120, 5, 30
     names = sys.argv[1].split(",") if len(sys.argv) > 1 else ["mlp", "dlinear", "gatedfusion"]
     stocks = [int(x) for x in (sys.argv[2].split(",") if len(sys.argv) > 2 else ["1"])]

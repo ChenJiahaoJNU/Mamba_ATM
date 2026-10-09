@@ -16,18 +16,18 @@ import re
 import sys
 
 PATTERNS = [
-    (r"Jiahao|Xiangdong", "author given name"),
+    (r"GIVEN_NAME|GIVEN_NAME", "author given name"),
     (r"Chen|Liu", "author family name (check the match by eye; these are common words)"),
-    (r"Jinan University|暨南", "affiliation"),
-    (r"jnu\.edu\.cn|stu2024", "e-mail address"),
+    (r"UNIVERSITY|AFFILIATION", "affiliation"),
+    (r"AUTHOR_DOMAIN|STUDENT_ID", "e-mail address"),
     (r"@[A-Za-z0-9.-]+\.(edu|com|cn|org)", "e-mail address"),
-    (r"ORCID|0000-0003-4673-1311", "ORCID"),
-    (r"ChenJiahaoJNU|Changahou|changahou", "personal repository account"),
+    (r"ORCID|ORCID_ID", "ORCID"),
+    (r"REPO_ACCOUNT|HF_ACCOUNT|hf_account", "personal repository account"),
     # third-party repositories are not identity leaks, so only personal-looking accounts are flagged
     (r"github\.com/(?!state-spaces|huggingface|pytorch|matplotlib|scipy|numpy)[A-Za-z0-9_.-]+",
      "repository URL with a personal account"),
     (r"huggingface\.co/(?!datasets/state)[A-Za-z0-9_.-]+", "repository URL with an account name"),
-    (r"Outstanding Innovative Talents|2025CXY", "funding acknowledgement"),
+    (r"FUNDING_BODY|GRANT_ID", "funding acknowledgement"),
     (r"School of Economics", "affiliation"),
 ]
 

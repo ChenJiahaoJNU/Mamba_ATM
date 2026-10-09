@@ -9,13 +9,13 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\code")
+sys.path.insert(0, r".\libs")
+sys.path.insert(0, r".\code")
 
 import pipeline as P            # noqa: E402
 import train_eval as TE         # noqa: E402
 
-DATA = r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\data"
+DATA = r".\data"
 SEQ, FOLDS, EPOCHS = 120, 5, 30
 
 print("%-8s %-12s %8s %8s %8s %8s   %s" %

@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 sys.stdout.reconfigure(encoding="utf-8")
-DATA = r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\data"
+DATA = r".\data"
 FEATS = ["当日开盘", "收盘价", "最高价", "最低价", "成交量", "成交额", "换手率", "昨收"]
 
 

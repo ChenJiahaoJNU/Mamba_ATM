@@ -43,8 +43,8 @@ sys.path.insert(0, HERE)
 import pipeline as P  # noqa: E402
 import train_eval as T  # noqa: E402
 
-DEFAULT_PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-                 r"\代码\data_panel_adj")
+DEFAULT_PANEL = (r"."
+                 r"\data\adj")
 DEFAULT_MODELS = ["mlp", "lstm", "attention+conv", "dlinear", "patchtst", "itransformer",
                   "timesnet", "ssm-only", "gatedfusion", "gatedfusion-guided"]
 

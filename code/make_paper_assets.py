@@ -23,9 +23,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "libs"))
 sys.path.insert(0, HERE)
 
-OUT = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\out")
-PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-         r"\代码\data_panel_adj")
+OUT = (r".\out")
+PANEL = (r"."
+         r"\data\adj")
 
 DISPLAY = {
     "gatedfusion": "MambaATM (gated)", "gatedfusion-guided": "MambaATM (guided)",

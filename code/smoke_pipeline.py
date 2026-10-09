@@ -8,12 +8,12 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\code")
+sys.path.insert(0, r".\libs")
+sys.path.insert(0, r".\code")
 
 import pipeline as P  # noqa: E402
 
-DATA = r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\data"
+DATA = r".\data"
 SEQ = 120
 
 print("%-10s %6s %6s %8s %8s %10s" % ("stock", "rows", "windows", "up-rate", "feat", "extra"))

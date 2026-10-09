@@ -20,7 +20,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
+sys.path.insert(0, r".\libs")
 from scipy import stats  # noqa: E402
 
 

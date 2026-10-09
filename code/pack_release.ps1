@@ -12,8 +12,8 @@
 # except the title page, which lives outside this package.
 
 $ErrorActionPreference = "Stop"
-$root = "D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-$w = "$root\_rework"
+$root = "."
+$w = "$root"
 $rel = "$root\_release_MambaATM"
 
 Remove-Item $rel -Recurse -Force -ErrorAction SilentlyContinue
@@ -30,8 +30,8 @@ Copy-Item "$root\_release_IJMLC\code\panel\download_matched_universe.py" "$rel\c
 Copy-Item "$root\_release_IJMLC\LICENSE" "$rel\LICENSE" -Force
 
 Write-Output "copying the panel (about 130 MB, this takes a minute)"
-Copy-Item "$root\代码\data_panel_adj" "$rel\data\adj" -Recurse -Force
-Copy-Item "$root\代码\data_panel_adj_unscreened" "$rel\data\adj_unscreened" -Recurse -Force
+Copy-Item "$root\data\adj" "$rel\data\adj" -Recurse -Force
+Copy-Item "$root\data\adj_unscreened" "$rel\data\adj_unscreened" -Recurse -Force
 
 foreach ($d in @("main", "seq20", "seq120", "seed7", "seed13")) {
     if (Test-Path "$w\out\$d") {

@@ -35,8 +35,8 @@ import costs as C  # noqa: E402
 import factors as FA  # noqa: E402
 import xsection as X  # noqa: E402
 
-DEFAULT_PANEL = (r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-                 r"\代码\data_panel_adj")
+DEFAULT_PANEL = (r"."
+                 r"\data\adj")
 MODELS = ["dlinear", "mlp", "lstm", "attention+conv", "patchtst", "itransformer", "timesnet",
           "ssm-only", "gatedfusion", "gatedfusion-guided"]
 

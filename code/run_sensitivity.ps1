@@ -6,9 +6,9 @@
 # are directly comparable with each other.
 
 $ErrorActionPreference = "Continue"
-$root = "D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM"
-$w = "$root\_rework"
-$panel = "$root\代码\data_panel_adj"
+$root = "."
+$w = "$root"
+$panel = "$root\data\adj"
 $py = "C:\ProgramData\anaconda3\envs\rl1\python.exe"
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONPATH = "$w\libs"

@@ -20,8 +20,8 @@ import sys
 
 import numpy as np
 import torch
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\libs")
-sys.path.insert(0, r"D:\研究生学习资料\暨南大学-博士学习资料\论文\重投\MambaATM\_rework\code")
+sys.path.insert(0, r".\libs")
+sys.path.insert(0, r".\code")
 
 import model_zoo  # noqa: E402
 import pipeline as P  # noqa: E402

@@ -36,7 +36,7 @@ def main(root):
     print(f"  metadata: {meta}")
     hits = [k for k in ("/Author", "/Subject", "/Keywords", "/Title") if meta.get(k)]
     print("  identity-bearing metadata fields: " + (", ".join(hits) if hits else "none"))
-    names = re.findall(r"Chen|Jiahao|Jinan|暨南|Liu|Pan", str(meta))
+    names = re.findall(r"SURNAME|GIVEN_NAME|UNIVERSITY|AFFILIATION", str(meta))
     print("  author-name fragments in metadata: " + (", ".join(sorted(set(names))) if names else "none"))
     raw = open(os.path.join(root, "sn-article.pdf"), "rb").read()
     urls = re.findall(rb"https?://[^\s\)\]<>]{4,80}", raw)
