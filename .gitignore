@@ -19,3 +19,13 @@ __pycache__/
 # submission logistics, kept out of the public repository
 SUBMISSION.md
 EvolvingSystems_MambaATM_source.zip
+
+# the manuscript is under review and is not published here
+sn-article.tex
+sn-article.pdf
+numbers.tex
+sn-bibliography.bib
+sn-jnl.cls
+sn-mathphys-ay.bst
+sn-mathphys-num.bst
+sn-basic.bst
