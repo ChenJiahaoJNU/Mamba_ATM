@@ -1,0 +1,20 @@
+% Friedman chi2 = 152.11, p = 3.22e-28, 232 stocks (accuracy); Wilcoxon signed-rank paired by stock, Holm corrected
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{rank (acc.)} & \textbf{rank (Sharpe)} & \textbf{$p$ vs MambaATM} \\
+\midrule
+MLP & 5.64 & 5.43 & 0.846 \\
+LSTM & 4.66 & 5.11 & 0.089 \\
+Attention (causal conv) & 4.94 & 4.85 & 0.286 \\
+DLinear & 4.26 & 5.50 & 0.003 \\
+PatchTST & 5.91 & 5.70 & 0.094 \\
+iTransformer & 7.07 & 5.82 & 0.000 \\
+TimesNet & 6.20 & 5.94 & 0.052 \\
+Selective SSM only & 5.84 & 5.93 & 0.286 \\
+MambaATM (gated fusion) & 5.32 & 5.27 & -- \\
+MambaATM (guided fusion) & 5.17 & 5.44 & 0.846 \\
+\bottomrule
+\end{tabular}
+}

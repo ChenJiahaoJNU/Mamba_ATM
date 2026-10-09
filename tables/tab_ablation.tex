@@ -1,0 +1,13 @@
+{\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Component} & \textbf{Accuracy} & \textbf{F1} & \textbf{Sharpe} & \textbf{Return} & \textbf{Parameters} \\
+\midrule
+Attention (causal conv) & 0.518 $\pm$ 0.019 & 0.345 & +0.18 & +26.0\% & 13\,313 \\
+Selective SSM only & 0.514 $\pm$ 0.022 & 0.355 & +0.05 & +16.2\% & 1\,057 \\
+MambaATM (gated fusion) & 0.516 $\pm$ 0.021 & 0.356 & +0.15 & +29.9\% & 23\,242 \\
+MambaATM (guided fusion) & 0.517 $\pm$ 0.021 & 0.340 & +0.12 & +22.1\% & 25\,452 \\
+\bottomrule
+\end{tabular}
+}

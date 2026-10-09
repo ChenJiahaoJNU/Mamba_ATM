@@ -1,0 +1,27 @@
+% window length, seed and per-year stability; rows appear only for runs that were made
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Setting} & \textbf{Accuracy} & \textbf{Majority class} & \textbf{Gap} & \textbf{Sharpe} & \textbf{Return} \\
+\midrule
+Window $T=60$, full panel (reported) & 0.516 $\pm$ 0.021 & 0.528 & -1.26 & +0.15 & +29.9\% \\
+Window $T=20$, 58-stock subset & 0.516 $\pm$ 0.019 & 0.526 & -0.95 & +0.20 & +56.4\% \\
+Window $T=120$, 58-stock subset & 0.516 $\pm$ 0.017 & 0.525 & -0.93 & +0.26 & +64.9\% \\
+Seed 0, 58-stock subset & 0.517 $\pm$ 0.019 & 0.526 & -0.87 & +0.27 & +63.1\% \\
+Seed 7, 58-stock subset & 0.517 $\pm$ 0.014 & 0.526 & -0.84 & +0.17 & +34.4\% \\
+Seed 13, 58-stock subset & 0.514 $\pm$ 0.017 & 0.526 & -1.14 & +0.25 & +41.2\% \\
+\midrule
+\multicolumn{6}{l}{\emph{Accuracy by test year, proposed model vs majority class}} \\
+  2017 & 0.448 & 0.552 & -10.45 & -- & -- \\
+  2018 & 0.488 & 0.548 & -5.94 & -- & -- \\
+  2019 & 0.516 & 0.518 & -0.14 & -- & -- \\
+  2020 & 0.513 & 0.530 & -1.76 & -- & -- \\
+  2021 & 0.516 & 0.525 & -0.93 & -- & -- \\
+  2022 & 0.517 & 0.526 & -0.86 & -- & -- \\
+  2023 & 0.528 & 0.547 & -1.94 & -- & -- \\
+  2024 & 0.507 & 0.523 & -1.66 & -- & -- \\
+  2025 & 0.514 & 0.510 & +0.45 & -- & -- \\
+\bottomrule
+\end{tabular}
+}

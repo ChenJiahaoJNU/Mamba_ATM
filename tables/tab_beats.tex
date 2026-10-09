@@ -1,0 +1,19 @@
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{beats majority (\%)} & \textbf{beats buy and hold (\%)} & \textbf{stocks} \\
+\midrule
+MLP & 23.3 & 34.1 & 232 \\
+LSTM & 23.3 & 33.6 & 232 \\
+Attention (causal conv) & 26.3 & 39.7 & 232 \\
+DLinear & 21.1 & 32.3 & 232 \\
+PatchTST & 18.5 & 30.6 & 232 \\
+iTransformer & 10.3 & 27.2 & 232 \\
+TimesNet & 19.0 & 28.9 & 232 \\
+Selective SSM only & 16.8 & 33.6 & 232 \\
+MambaATM (gated fusion) & 24.1 & 33.6 & 232 \\
+MambaATM (guided fusion) & 23.7 & 37.1 & 232 \\
+\bottomrule
+\end{tabular}
+}

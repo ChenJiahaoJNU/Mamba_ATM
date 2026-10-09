@@ -1,0 +1,13 @@
+{
+  "mlp": 69889,
+  "lstm": 52417,
+  "attention": 13057,
+  "attention+conv": 13313,
+  "dlinear": 147,
+  "patchtst": 101953,
+  "itransformer": 104074,
+  "timesnet": 37497,
+  "ssm-only": 1057,
+  "gatedfusion": 23242,
+  "gatedfusion-guided": 25452
+}

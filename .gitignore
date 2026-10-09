@@ -1,17 +1,21 @@
-__pycache__/
-*.py[cod]
-.ipynb_checkpoints/
-
-# run outputs
-out/
-logs/
-analysis/
-pre_data/
-wandb/
+# LaTeX build products
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
 *.synctex.gz
+*.fls
+*.fdb_latexmk
 
-# checkpoints and data files that should not be committed
-*.pt
-*.pth
-*.ckpt
-*.whl
+# the panel is hosted on Hugging Face, see data/README.md
+data/adj/
+data/adj_unscreened/
+
+# python
+__pycache__/
+*.pyc
+
+# submission logistics, kept out of the public repository
+SUBMISSION.md
+EvolvingSystems_MambaATM_source.zip

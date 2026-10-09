@@ -1,0 +1,23 @@
+{\tiny
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Score} & \textbf{IC cc} & \textbf{$t$} & \textbf{IC night} & \textbf{$t$} & \textbf{IC day} & \textbf{$t$} & \textbf{Predicted IC cc} \\
+\midrule
+Turnover (1 day, negated) & 0.0678 & 14.4 & 0.1440 & 41.3 & 0.0159 & 3.3 & 0.0706 \\
+Turnover value (negated) & 0.0674 & 16.2 & 0.1168 & 31.6 & 0.0257 & 6.0 & 0.0573 \\
+MambaATM (guided) & 0.0721 & 21.7 & 0.1369 & 48.6 & 0.0161 & 4.7 & 0.0672 \\
+MambaATM (gated) & 0.0671 & 20.8 & 0.1241 & 45.3 & 0.0158 & 4.8 & 0.0609 \\
+Attention + causal conv & 0.0688 & 19.1 & 0.1319 & 45.9 & 0.0190 & 5.1 & 0.0647 \\
+LSTM & 0.0633 & 20.0 & 0.1115 & 40.3 & 0.0195 & 6.0 & 0.0547 \\
+TimesNet & 0.0667 & 21.5 & 0.1197 & 42.7 & 0.0191 & 6.1 & 0.0587 \\
+DLinear & 0.0576 & 17.4 & 0.1098 & 41.2 & 0.0157 & 4.8 & 0.0539 \\
+MLP & 0.0525 & 16.7 & 0.0929 & 32.6 & 0.0179 & 5.6 & 0.0456 \\
+iTransformer & 0.0546 & 16.5 & 0.1039 & 39.6 & 0.0165 & 4.9 & 0.0510 \\
+PatchTST & 0.0337 & 9.3 & 0.0635 & 22.8 & 0.0123 & 3.3 & 0.0311 \\
+Reversal (5 days) & 0.0288 & 6.8 & 0.0467 & 15.4 & 0.0221 & 5.3 & 0.0229 \\
+Overnight gap (negated) & -0.0290 & -11.3 & -0.0752 & -30.4 & 0.0053 & 2.0 & -0.0369 \\
+Close-location value (5 days) & -0.0188 & -5.6 & -0.0524 & -19.8 & -0.0055 & -1.7 & -0.0257 \\
+\bottomrule
+\end{tabular}
+}

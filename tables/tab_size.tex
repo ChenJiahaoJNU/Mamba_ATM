@@ -1,0 +1,20 @@
+% parameter counts from verify_zoo.py, wall-clock from the same run as the metrics
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{trainable parameters} & \textbf{seconds per stock (5 folds)} \\
+\midrule
+MLP & 69\,889 & 5.1 $\pm$ 1.1 \\
+LSTM & 52\,417 & 13.7 $\pm$ 3.2 \\
+Attention (causal conv) & 13\,313 & 8.6 $\pm$ 2.0 \\
+DLinear & 147 & 8.9 $\pm$ 2.7 \\
+PatchTST & 101\,953 & 25.2 $\pm$ 4.9 \\
+iTransformer & 104\,074 & 17.3 $\pm$ 4.0 \\
+TimesNet & 37\,497 & 62.2 $\pm$ 14.4 \\
+Selective SSM only & 1\,057 & 26.3 $\pm$ 6.6 \\
+MambaATM (gated fusion) & 23\,242 & 26.7 $\pm$ 6.6 \\
+MambaATM (guided fusion) & 25\,452 & 28.3 $\pm$ 6.7 \\
+\bottomrule
+\end{tabular}
+}

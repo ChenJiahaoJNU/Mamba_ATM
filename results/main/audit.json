@@ -1,0 +1,27 @@
+{
+  "parameters": {
+    "mlp": 69889,
+    "lstm": 52417,
+    "attention": 13057,
+    "attention+conv": 13313,
+    "dlinear": 147,
+    "patchtst": 101953,
+    "itransformer": 104074,
+    "timesnet": 37497,
+    "ssm-only": 1057,
+    "gatedfusion": 23242,
+    "gatedfusion-guided": 25452
+  },
+  "models_creating_modules_in_forward": [],
+  "pass_no_forward_modules": true,
+  "causality_max_change": {
+    "attention": 0.0,
+    "attention+conv": 0.0,
+    "ssm-only": 0.0,
+    "gatedfusion": 0.0,
+    "gatedfusion-guided": 0.0
+  },
+  "pass_causality": true,
+  "pass_standardiser": true,
+  "all_pass": true
+}

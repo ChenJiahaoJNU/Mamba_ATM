@@ -1,0 +1,22 @@
+% equal-weight portfolio of the panel at the base cost of 10 bp one way; the cost
+% sensitivity is in Figure 4 and in the numbers quoted in Section 5.4
+{\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{ann. \%} & \textbf{Sharpe} & \textbf{max DD \%} & \textbf{turnover} \\
+\midrule
+Attention (causal conv) & -1.2 & +0.08 & 65.1 & 0.0024 \\
+DLinear & +2.9 & +0.24 & 44.4 & 0.0288 \\
+MambaATM (gated fusion) & -1.0 & +0.09 & 64.5 & 0.0014 \\
+MambaATM (guided fusion) & -1.0 & +0.08 & 63.7 & 0.0033 \\
+iTransformer & -0.3 & +0.11 & 62.3 & 0.0014 \\
+LSTM & +0.0 & +0.13 & 61.3 & 0.0014 \\
+MLP & -0.8 & +0.09 & 61.7 & 0.0033 \\
+PatchTST & +2.6 & +0.23 & 54.8 & 0.0052 \\
+Selective SSM only & +0.0 & +0.12 & 63.9 & 0.0118 \\
+TimesNet & +2.1 & +0.21 & 57.1 & 0.0128 \\
+\emph{Buy and hold} & -1.4 & +0.07 & 63.7 & 0.0000 \\
+\bottomrule
+\end{tabular}
+}

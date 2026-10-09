@@ -1,0 +1,9 @@
+Highlights
+
+MambaATM revisited: a gated attention and selective state-space fusion evaluated on absolute direction and cross-sectional rank in Chinese equities
+
+- MambaATM fuses causal attention and a selective state-space branch with a gate
+- The claimed guided state update is implemented, measured, and adds nothing
+- Ten models, 232 A-share stocks, 610k rows, walk-forward folds with a purge
+- On absolute daily direction no model beats the majority class
+- The cross-sectional signal sits in the overnight leg and only pays weekly

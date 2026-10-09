@@ -1,0 +1,24 @@
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.42\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Stocks & 232 \\
+Trading days & 2015-01-06 to 2025-12-31 \\
+Rows in the files & 610\,988 \\
+Rows removed: no previous close (first row of each file) & 232 \\
+Rows removed: zero volume (suspension) & 22\,798 (3.7\%) \\
+Rows removed: no next-day label (last row of each file) & 232 \\
+Rows removed twice, being both a first row and a suspension day & 25\, so the three lines above remove 23\,237 distinct rows \\
+Usable stock-days & 587\,751 \\
+Usable rows per stock (min / median / max) & 1124 / 2596 / 2671 \\
+Features & 8: open, close, high, low, volume, turnover value, turnover rate, previous close \\
+Label & sign of the next trading day's close-to-close return \\
+Share of up days (mean over stocks) & 0.480 \\
+Largest absolute rank correlation, any feature with the next-day return & 0.100 (median 0.043) \\
+Lag-one autocorrelation of returns (mean, min, max) & +0.080, -0.034, +0.228 \\
+Audit: causality change before the cutoff & 0.000000 for every causal model \\
+Audit: modules built inside a forward pass & none \\
+Audit: standardiser fitted on the training block only & passes \\
+Audit: return column against the price columns & correlation 1.000, mean absolute difference $5\times10^{-17}$ \\
+\bottomrule
+\end{tabularx}

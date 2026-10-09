@@ -1,0 +1,43 @@
+% The architecture as it was described in the earlier version of this work, and as it is implemented
+% here. Every entry in the right-hand column is reproduced by a script in the code release.
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.22\textwidth}
+	>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+	\toprule
+	\textbf{Aspect} & \textbf{Earlier description} & \textbf{Implementation evaluated here} \\
+	\midrule
+	Fusion & Attention guides the state update of the state-space branch; the two branches are not
+	concatenated. &
+	The two branch outputs are mixed by a learned sigmoid gate,
+	$g \odot h_{\text{ssm}} + (1-g)\odot h_{\text{att}}$. The gate weights the outputs; it does not
+	touch the state update. \\
+	\addlinespace
+	Guidance & Stated as the defining mechanism of the proposed model. &
+	Implemented as a separate variant, with zero-initialised projections that scale the
+	discretisation step and shift the input and output matrices. Reported as an ablation. \\
+	\addlinespace
+	Attention branch & Implied absent in the complexity argument, since only the QKV projection was
+	said to be retained. &
+	A full causal attention branch is present and contributes its output to the fused representation. \\
+	\addlinespace
+	Complexity & $\mathcal{O}(B T D N \log T + B T d_k^2)$, with the quadratic term described as
+	eliminated. &
+	$\mathcal{O}(B T^2 H + B T d_k^2 + B T D N)$: the quadratic term is present and bounded by the
+	window length $T$. \\
+	\addlinespace
+	Causality & ``Every model passes with a change of exactly zero.'' &
+	Measured. The causal variants pass with a change of exactly zero; the architecture of the earlier
+	version fails, with a change of $4\times10^{-3}$ to $7\times10^{-3}$, because of symmetric
+	padding in a depthwise convolution. \\
+	\addlinespace
+	Weights & Not discussed. &
+	No module is constructed inside a forward pass, verified by comparing the parameter set before
+	and after a forward pass. The earlier version built a residual projection inside
+	\texttt{forward}, which left it untrained. \\
+	\addlinespace
+	Data & Four unnamed stocks, 2{,}435 rows each, six features, 2015--2025, normalised to $[0,1]$. &
+	\nStocks{} named A-share stocks, \nStockDays{} usable stock-days, eight features, \firstDate{} to
+	\lastDate{}, standardised inside each fold on the training block only. \\
+	\bottomrule
+\end{tabularx}
