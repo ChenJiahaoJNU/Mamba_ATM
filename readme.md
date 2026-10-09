@@ -170,7 +170,7 @@ The key results and the script that produces each.
 
 The panel is hosted separately, as a Hugging Face dataset, because it is 123 MB of CSV.
 
-    https://huggingface.co/datasets/Changahou/Mamba_ATM
+    https://huggingface.co/datasets/Changahou/MATM
 
 It holds two directories. `adj/` is the screened panel the paper uses, which is 232 stocks with
 610,988 rows. `adj_unscreened/` is the same panel before screening, which is 240 stocks, so the

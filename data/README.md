@@ -2,7 +2,7 @@
 
 It is 123 MB of CSV, so it is hosted as a Hugging Face dataset instead:
 
-    https://huggingface.co/datasets/Changahou/Mamba_ATM
+    https://huggingface.co/datasets/Changahou/MATM
 
 Download it and place the two directories here, so that the paths the scripts expect are restored.
 
